@@ -797,6 +797,8 @@ html[dir=rtl] .qa p{padding:0 calc(20px + 40px + 16px) 22px 20px}
 .qa p,html[dir=rtl] .qa p{padding:0 16px 18px}
 }
 @media(prefers-reduced-motion:reduce){.qa,.qa::before,.qi,.fqb{transition:none}}
+.vmf.ld::after{content:"";position:absolute;top:50%;left:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;border:3px solid rgba(255,255,255,.25);border-top-color:var(--pink);animation:vspin .8s linear infinite;pointer-events:none;z-index:3}
+@keyframes vspin{to{transform:rotate(360deg)}}
 /* ===== performance ===== */
 .rpi{animation:none}
 .rpi::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,201,77,.75);animation:rp 2.4s ease-out infinite;pointer-events:none}
@@ -1241,6 +1243,7 @@ v.addEventListener('click',function(){v.paused?play():v.pause()});
 v.addEventListener('play',function(){f.classList.add('playing');v.controls=true});
 v.addEventListener('timeupdate',mark);v.addEventListener('seeked',mark);v.addEventListener('loadedmetadata',mark);
 cs.forEach(function(c,i){c.addEventListener('click',function(){go(i)})});
+cs.forEach(function(c,i){if(i<T.length)return;var w=function(){if(c._w)return;c._w=1;try{fetch(X[i-T.length],{headers:{Range:'bytes=0-393215'}}).catch(function(){})}catch(e){}};c.addEventListener('pointerenter',w);c.addEventListener('touchstart',w,{passive:true})});
 mark();
 })();
 (function(){
@@ -1396,6 +1399,7 @@ function show(i){
    v.setAttribute('controlsList','nodownload noplaybackrate');v.disablePictureInPicture=true;
    if(im)v.poster=im.currentSrc||im.src;
    v.addEventListener('contextmenu',function(e){e.preventDefault()});
+   vf.classList.add('ld');['playing','canplay','error'].forEach(function(ev){v.addEventListener(ev,function(){vf.classList.remove('ld')},{once:true})});v.addEventListener('waiting',function(){vf.classList.add('ld')});v.addEventListener('playing',function(){vf.classList.remove('ld')});
    vf.appendChild(v);var p=v.play();if(p&&p.catch)p.catch(function(){});
    return;
   }
@@ -1419,6 +1423,9 @@ function close(){
  if(back&&back.focus){try{back.focus({preventScroll:true})}catch(e){}}
 }
 document.querySelectorAll('a.rlc[data-v]').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();open(a)})});
+/* warm the video a moment before the tap/click lands */
+var warmed={};function warm(a){var s=a.dataset.src;if(!s||warmed[s])return;warmed[s]=1;try{fetch(s,{headers:{Range:'bytes=0-393215'}}).catch(function(){})}catch(e){}}
+document.querySelectorAll('a.rlc[data-src]').forEach(function(a){a.addEventListener('pointerenter',function(){warm(a)});a.addEventListener('touchstart',function(){warm(a)},{passive:true});a.addEventListener('focus',function(){warm(a)})});
 vc.addEventListener('click',close);
 vp.addEventListener('click',function(){show(idx-1)});
 vn.addEventListener('click',function(){show(idx+1)});
